@@ -14,20 +14,21 @@ namespace EncryptRsa
         static async Task Main(string[] args)
         {
 
-            string decrypt = "NukMjA6p80NqkeQg1NABrK9cxIJeu25SUxdgkMttG+kHH0e3hlviJI1jGsVPh8UjnAUEuK3erxJxj2w0GTvRJSpS7bBxmPH0vgRIju5RgjLvzBfxq7K/OPWZ5rSu8ZNXZOIIysPgvJmt8kiKkMZG56L+snkPPnoNiRWpzZNtAlE=";
+            string decrypt = "RncLoZTcX1Gjlyus/y0Lis0NT29Y1BwClU1nhXSZQF+KGxcTBLnkIcAlLU6Nm9BJL382HZXiG95bql1BE3IHYg3G3k/qRcGIa6N26hAwTgJVUgCyPhXNmlzz2B7DfhvCnWKxy031XG650FwtUYY7FwwpN3aDspRO2lkargx1J5w=";
             string encrypt = "12345678";
             object KeyResult;
             string xmlParams;
             KeyResult = await Web_Request.MakeAsyncRequestc(key: "");
             xmlParams = KeyResult.ToString();
             Encrypt_RSA.EncryptRsa(encrypt, xmlParams);
+            Encrypt_RSA.DecryptRsa(decrypt, xmlParams);
         }
     }
     class Encrypt_RSA
     {
         public static void EncryptRsa(string encrypt, string xmlParams)
         {
-            Console.WriteLine(xmlParams);
+            //Console.WriteLine(xmlParams);
             // Text to encrypt and decrypt.
             Console.WriteLine(encrypt);
             // Use OAEP padding (PKCS#1 v2).
@@ -45,13 +46,12 @@ namespace EncryptRsa
             var rsaParamsPublic = rsa.ExportParameters(false);
             // Export Public Key (Modulus + Exponent) and include Private Key (D) required for decryption.
             var rsaParamsPrivate = rsa.ExportParameters(true);
-            rsa.Dispose();
             // ------------------------------------------------
             // Encrypt
             // ------------------------------------------------
             var decryptedBytes = Encoding.UTF8.GetBytes(encrypt);
             // Create a new instance of RSACryptoServiceProvider.
-            rsa = new RSACryptoServiceProvider();
+            //rsa = new RSACryptoServiceProvider();
             // Import the RSA Key information.
             rsa.ImportParameters(rsaParamsPublic);
             // Encrypt byte array.
@@ -59,24 +59,37 @@ namespace EncryptRsa
             // Convert bytes to base64 string.
             var encryptedString = Convert.ToBase64String(encryptedBytes);
             rsa.Dispose();
+            
             Console.WriteLine(encryptedString);
             // ------------------------------------------------
+            
+        }
+
+        public static void DecryptRsa(string decrypt, string xmlParams) {
             // Decrypt
             // ------------------------------------------------
+            var doOaepPadding = true;
+            // ------------------------------------------------
+            // RSA Keys
+            // ------------------------------------------------
+            var rsa = new RSACryptoServiceProvider();
+            rsa.FromXmlString(xmlParams);
+            var rsaParamsPrivate = rsa.ExportParameters(true);
             // Convert base64 string back to bytes.
-            encryptedBytes = Convert.FromBase64String(encryptedString);
+            var encryptedBytes = Convert.FromBase64String(decrypt);
             // Create a new instance of RSACryptoServiceProvider.
-            rsa = new RSACryptoServiceProvider();
             // Import the RSA Key information.
             rsa.ImportParameters(rsaParamsPrivate);
             // Decrypt byte array.
-            decryptedBytes = rsa.Decrypt(encryptedBytes, doOaepPadding);
+            var decryptedBytes = rsa.Decrypt(encryptedBytes, doOaepPadding);
             // Get decrypted data.
             string ResultDecrypt = Encoding.UTF8.GetString(decryptedBytes);
             rsa.Dispose();
             Console.WriteLine(ResultDecrypt);
             // ------------------------------------------------
+
         }
+
 
         /// <summary>
         /// Import OpenSSH PEM private key string into MS RSACryptoServiceProvider
