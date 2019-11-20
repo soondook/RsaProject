@@ -14,7 +14,7 @@ namespace EncryptRsa
         static async Task Main(string[] args)
         {
 
-            //string decrypt = args[1];
+            string decrypt = args[1];
             string encrypt = "12345678";
             object KeyResult;
             string xmlParams;
